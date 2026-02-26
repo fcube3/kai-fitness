@@ -26,7 +26,7 @@ export default function ExercisePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api//data', { credentials: 'include' })
+    fetch('/api/fitness/data', { credentials: 'include' })
       .then(r => r.json())
       .then(d => setSessions(d.sessions || []))
       .finally(() => setLoading(false));

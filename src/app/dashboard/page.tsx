@@ -37,7 +37,7 @@ export default function FitnessDashboard() {
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api//data', { credentials: 'include' })
+    fetch('/api/fitness/data', { credentials: 'include' })
       .then(r => r.json())
       .then(d => {
         setSessions(d.sessions || []);
