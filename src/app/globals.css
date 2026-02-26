@@ -5,9 +5,16 @@
 :root {
   --background: #09090b;
   --foreground: #fafafa;
+  --accent: #22C55E;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
+  font-family: system-ui, sans-serif;
+}
+
+/* Data tables / numbers use mono */
+.font-data, code, pre, td, th, .tabular-nums {
+  font-family: 'JetBrains Mono', monospace;
 }

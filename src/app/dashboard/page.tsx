@@ -55,12 +55,48 @@ export default function FitnessDashboard() {
   );
 
   if (!sessions.length) return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-zinc-950 px-4 text-zinc-100">
-      <p className="text-lg">No workout data yet.</p>
-      <p className="text-sm text-zinc-400">Run the import script: <code className="rounded bg-zinc-800 px-2 py-1">node scripts/-import.js</code></p>
-      <form action="/logout" method="post" className="mt-4">
-        <button className="rounded-lg border border-white/15 bg-zinc-900 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800">Log out</button>
-      </form>
+    <main className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-4 text-zinc-100">
+      {/* Ambient glow */}
+      <div className="pointer-events-none fixed inset-0 flex items-center justify-center">
+        <div className="h-[500px] w-[500px] rounded-full bg-green-500/5 blur-3xl" />
+      </div>
+
+      <div className="relative flex flex-col items-center gap-6 text-center max-w-sm">
+        {/* Icon illustration */}
+        <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-green-500/10 border border-green-500/20">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 13H8a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h5" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round"/>
+            <path d="M35 13h5a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2h-5" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round"/>
+            <rect x="13" y="17" width="22" height="14" rx="3" stroke="#22C55E" strokeWidth="2.5"/>
+            <path d="M13 24h22" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" opacity="0.3"/>
+            <circle cx="34" cy="10" r="4" fill="#22C55E" opacity="0.2" stroke="#22C55E" strokeWidth="1.5"/>
+            <path d="M32.5 10l1 1.5 2-2.5" stroke="#22C55E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+
+        {/* Copy */}
+        <div className="space-y-2">
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-green-400">Ready to train</div>
+          <h2 className="text-2xl font-bold text-zinc-100">No sessions yet</h2>
+          <p className="text-sm text-zinc-400 leading-relaxed">
+            Your performance data lives here — PRs, volume trends, weakness flags. Import your first workout to get started.
+          </p>
+        </div>
+
+        {/* CTA */}
+        <div className="space-y-3 w-full">
+          <div className="rounded-xl border border-green-500/20 bg-green-500/5 px-4 py-3 text-left">
+            <p className="text-xs text-zinc-400 mb-1">Import via script</p>
+            <code className="text-xs text-green-300 font-mono">node scripts/fitness-import.js</code>
+          </div>
+        </div>
+
+        <form action="/logout" method="post">
+          <button className="rounded-lg border border-white/10 bg-zinc-900 px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition">
+            Log out
+          </button>
+        </form>
+      </div>
     </main>
   );
 
@@ -126,27 +162,38 @@ export default function FitnessDashboard() {
   return (
     <main className="min-h-screen bg-zinc-950 px-4 py-8 text-zinc-100 sm:px-6">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+        {/* Nav bar */}
+        <nav className="sticky top-0 z-50 -mx-4 sm:-mx-6 border-b border-white/5 bg-zinc-950/90 backdrop-blur-sm px-4 sm:px-6 py-3 mb-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.7)]" />
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-green-400">Kai Fitness</span>
+            </div>
+            <div className="flex gap-2">
+              <a href="/sessions" className="rounded-lg border border-green-400/30 bg-green-500/10 px-3 py-1.5 text-xs text-green-300 hover:bg-green-500/20 transition">
+                Sessions
+              </a>
+              <form action="/logout" method="post">
+                <button className="rounded-lg border border-white/10 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-400 hover:bg-zinc-800 transition">
+                  Log out
+                </button>
+              </form>
+            </div>
+          </div>
+        </nav>
+
         {/* Header */}
-        <header className="flex flex-wrap items-start justify-between gap-3">
+        <header className="flex flex-wrap items-start justify-between gap-3 pb-4 border-b border-white/5">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-emerald-400">Private · Fitness</p>
-            <h1 className="mt-2 text-3xl font-bold">Fitness Hub</h1>
-            <p className="mt-1 text-sm text-zinc-400">
-              Last workout: {lastSession.date} ({lastSession.id}) · {meta.sessionCount || sessions.length} sessions
+            <p className="text-[10px] uppercase tracking-[0.3em] text-green-400">Performance Hub</p>
+            <h1 className="mt-1 text-2xl font-bold text-zinc-100">Fitness Dashboard</h1>
+            <div className="mt-1 h-0.5 w-10 rounded-full bg-green-500" />
+            <p className="mt-2 text-sm text-zinc-400">
+              Last: {lastSession.date} · {lastSession.id} · {meta.sessionCount || sessions.length} sessions
             </p>
             {meta.lastImport && (
-              <p className="text-xs text-zinc-500">Last import: {new Date(meta.lastImport).toLocaleString()}</p>
+              <p className="text-xs text-zinc-600">Imported: {new Date(meta.lastImport).toLocaleString()}</p>
             )}
-          </div>
-          <div className="flex gap-2">
-            <a href="/sessions" className="rounded-lg border border-emerald-400/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200 hover:bg-emerald-500/20">
-              All Sessions
-            </a>
-            <form action="/logout" method="post">
-              <button className="rounded-lg border border-white/15 bg-zinc-900 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800">
-                Log out
-              </button>
-            </form>
           </div>
         </header>
 
@@ -278,9 +325,10 @@ export default function FitnessDashboard() {
 
 function Card({ title, value, sub }: { title: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-zinc-900/80 p-4">
-      <p className="text-xs uppercase tracking-wide text-zinc-400">{title}</p>
-      <p className="mt-2 text-2xl font-semibold text-zinc-100">{value}</p>
+    <div className="rounded-xl border border-white/10 bg-zinc-900/80 p-4 relative overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-green-500/60 to-transparent" />
+      <p className="text-[10px] uppercase tracking-widest text-zinc-500">{title}</p>
+      <p className="mt-2 text-2xl font-bold text-green-400">{value}</p>
       {sub && <p className="mt-1 text-xs text-zinc-500">{sub}</p>}
     </div>
   );
