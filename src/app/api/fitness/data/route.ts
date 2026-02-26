@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  try {
   const expectedPassword = process.env.FITNESS_PASSWORD?.trim();
   if (!expectedPassword) {
     return NextResponse.json({ error: 'FITNESS_PASSWORD not configured' }, { status: 503 });
@@ -74,6 +75,11 @@ export async function GET(request: NextRequest) {
   };
 
   return NextResponse.json({ sessions: reconstructed, exercises: exerciseNames, meta });
+  } catch (err: unknown) {
+    console.error('GET /api/fitness/data error:', err);
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
 
 /** Reconstruct WorkoutSet[] from DB row */
