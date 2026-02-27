@@ -1,20 +1,24 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-accent: #22C55E;
+  --color-accent-muted: rgba(34,197,94,0.15);
+  --color-accent-border: rgba(34,197,94,0.3);
+  --font-data: 'JetBrains Mono', monospace;
+  --font-ui: system-ui, sans-serif;
+}
 
 :root {
   --background: #09090b;
   --foreground: #fafafa;
-  --accent: #22C55E;
 }
 
 body {
-  color: var(--foreground);
   background: var(--background);
-  font-family: system-ui, sans-serif;
+  color: var(--foreground);
 }
 
-/* Data tables / numbers use mono */
-.font-data, code, pre, td, th, .tabular-nums {
-  font-family: 'JetBrains Mono', monospace;
-}
+.scrollbar-custom::-webkit-scrollbar { width: 4px; }
+.scrollbar-custom::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-custom::-webkit-scrollbar-thumb { background-color: #30363d; border-radius: 2px; }
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
