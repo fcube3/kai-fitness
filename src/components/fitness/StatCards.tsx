@@ -1,85 +1,64 @@
 'use client';
 
-import type { FitnessStats } from './types';
-
-function formatVolume(kg: number) {
-  if (kg >= 1000) return `${(kg / 1000).toFixed(1)}t`;
-  return `${Math.round(kg)}kg`;
-}
-
-function deltaClass(delta: number) {
-  if (delta > 0) return 'text-emerald-400';
-  if (delta < 0) return 'text-red-400';
-  return 'text-zinc-500';
-}
+import type { Session, Meta, PR } from '@/lib/types';
 
 function StatCard({
   label,
   value,
   sub,
-  badge,
+  accent,
 }: {
   label: string;
   value: string;
   sub?: string;
-  badge?: { text: string; color: string };
+  accent?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-zinc-900/80 p-4 flex flex-col gap-1 min-w-0">
-      <p className="text-[10px] uppercase tracking-widest text-zinc-500 truncate">{label}</p>
-      <p className="text-xl font-semibold text-zinc-100 truncate">{value}</p>
-      <div className="flex items-center gap-2 min-h-[1rem]">
-        {sub && <p className="text-xs text-zinc-400 truncate">{sub}</p>}
-        {badge && (
-          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${badge.color}`}>
-            {badge.text}
-          </span>
-        )}
-      </div>
+    <div className="relative overflow-hidden rounded-xl border border-white/10 bg-zinc-900 p-4">
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-green-500/60 to-transparent" />
+      <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">{label}</p>
+      <p className={`mt-2 text-xl font-black truncate md:text-2xl ${accent ? 'text-green-400' : 'text-zinc-100'}`}>
+        {value}
+      </p>
+      {sub && <p className="mt-1 text-[11px] text-zinc-500 truncate">{sub}</p>}
     </div>
   );
 }
 
-export function StatCards({ stats }: { stats: FitnessStats }) {
-  const lastDate = new Date(stats.lastWorkoutDate);
-  const daysAgo = Math.floor(
-    (Date.now() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
-  const lastWorkoutSub =
-    daysAgo === 0 ? 'Today' : daysAgo === 1 ? 'Yesterday' : `${daysAgo}d ago`;
-
-  const volDelta = stats.weeklyVolumeDelta;
-  const volBadge = volDelta !== 0
-    ? {
-        text: `${volDelta > 0 ? '+' : ''}${volDelta.toFixed(0)}%`,
-        color: volDelta > 0
-          ? 'text-emerald-400 border-emerald-400/30 bg-emerald-400/10'
-          : 'text-red-400 border-red-400/30 bg-red-400/10',
-      }
-    : undefined;
-
+export default function StatCards({
+  sessions,
+  exercises,
+  meta,
+  lastSession,
+  topPR,
+}: {
+  sessions: Session[];
+  exercises: string[];
+  meta: Meta;
+  lastSession: Session;
+  topPR: PR | null;
+}) {
   return (
-    <div className="grid grid-cols-2 gap-3">
-      <StatCard
-        label="Last Workout"
-        value={stats.lastWorkoutSplit}
-        sub={lastWorkoutSub}
-      />
+    <div className="grid grid-cols-2 gap-3 mb-6 md:grid-cols-4">
       <StatCard
         label="Total Sessions"
-        value={String(stats.totalSessions)}
-        sub={`${stats.currentWeekSessions} this week`}
+        value={String(meta.sessionCount || sessions.length)}
       />
       <StatCard
-        label="Current Split"
-        value={stats.currentSplit}
-        sub="Active program"
+        label="Exercises"
+        value={String(exercises.length)}
+        sub="tracked"
       />
       <StatCard
-        label="Weekly Volume"
-        value={formatVolume(stats.weeklyVolumeKg)}
-        sub="vs last week"
-        badge={volBadge}
+        label="Latest Split"
+        value={lastSession.split || '—'}
+        sub={lastSession.week ? `Week ${lastSession.week}` : undefined}
+      />
+      <StatCard
+        label="Top PR"
+        value={topPR ? `${topPR.weight}kg` : '—'}
+        sub={topPR?.name}
+        accent
       />
     </div>
   );
