@@ -1,55 +1,36 @@
 'use client';
 
-import type { PRRecord } from './types';
+import type { PR } from '@/lib/types';
 
-function PRCard({ record }: { record: PRRecord }) {
-  const date = new Date(record.date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  });
-
+export default function PRBoard({ prs }: { prs: PR[] }) {
   return (
-    <div className="flex items-center justify-between rounded-lg border border-white/10 bg-zinc-800/60 px-3 py-2.5 gap-2">
-      <div className="min-w-0">
-        <p className="text-sm font-medium text-zinc-100 truncate">{record.exercise}</p>
-        <p className="text-[10px] text-zinc-500 mt-0.5">{date}</p>
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <span className="text-lg font-bold text-emerald-400 tabular-nums">
-          {record.weightKg}
-          <span className="text-xs font-normal text-zinc-500 ml-0.5">kg</span>
-        </span>
-        {record.isRecent && (
-          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-400/10 border border-emerald-400/30 text-emerald-400 uppercase tracking-wide">
-            New
-          </span>
-        )}
-      </div>
-    </div>
-  );
-}
-
-export function PRBoard({ records }: { records: PRRecord[] }) {
-  const sorted = [...records].sort((a, b) => b.weightKg - a.weightKg);
-  const recent = sorted.filter((r) => r.isRecent).length;
-
-  return (
-    <section className="rounded-xl border border-white/10 bg-zinc-900/80 p-4">
+    <section className="rounded-xl border border-white/10 bg-zinc-900 p-5">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-semibold text-zinc-200">PR Board</h2>
-        {recent > 0 && (
-          <span className="text-[10px] font-medium text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-0.5 rounded-full">
-            {recent} new PR{recent > 1 ? 's' : ''} this month
-          </span>
-        )}
+        <h2 className="text-sm font-bold text-zinc-100">PR Board</h2>
+        <span className="text-[10px] text-zinc-500">{prs.length} lifts</span>
       </div>
-      <div className="flex flex-col gap-2">
-        {sorted.map((record) => (
-          <PRCard key={record.exercise} record={record} />
+      <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+        {prs.slice(0, 15).map((pr, i) => (
+          <div
+            key={pr.name}
+            className={`flex items-center justify-between rounded-lg px-3 py-2.5 gap-2 ${
+              i === 0
+                ? 'bg-green-500/10 border border-green-500/20'
+                : 'bg-zinc-800/60 border border-white/5'
+            }`}
+          >
+            <div className="min-w-0">
+              <p className={`text-sm font-medium truncate ${i === 0 ? 'text-green-300' : 'text-zinc-200'}`}>
+                {i === 0 && <span className="mr-1.5 text-[10px]">👑</span>}
+                {pr.name}
+              </p>
+              <p className="text-[10px] text-zinc-600 mt-0.5">{pr.date}</p>
+            </div>
+            <span className={`text-base font-bold tabular-nums shrink-0 ${i === 0 ? 'text-green-400' : 'text-zinc-300'}`}>
+              {pr.weight}<span className="text-xs font-normal text-zinc-500">kg</span>
+            </span>
+          </div>
         ))}
-        {sorted.length === 0 && (
-          <p className="text-xs text-zinc-500 text-center py-6">No PRs logged yet</p>
-        )}
       </div>
     </section>
   );
