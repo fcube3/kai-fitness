@@ -2,18 +2,18 @@
 
 import type { Session } from '@/lib/types';
 
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
 function getWeekGrid(sessions: Session[], weeks = 20) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Count workouts per date
   const counts = new Map<string, number>();
   for (const s of sessions) {
     counts.set(s.date, (counts.get(s.date) || 0) + 1);
   }
 
-  // Build grid: columns = weeks, rows = days (Sun=0 to Sat=6)
-  // Find the Sunday that starts the earliest week we want to show
+  // Start from the Sunday that begins our earliest week
   const startDate = new Date(today);
   startDate.setDate(startDate.getDate() - startDate.getDay() - (weeks - 1) * 7);
 
@@ -34,27 +34,29 @@ function getWeekGrid(sessions: Session[], weeks = 20) {
     grid.push(week);
   }
 
-  return grid;
+  return { grid, startDate };
+}
+
+function getMonthLabels(grid: { date: string; count: number; future: boolean }[][]): { label: string; col: number }[] {
+  const labels: { label: string; col: number }[] = [];
+  let lastMonth = -1;
+
+  for (let w = 0; w < grid.length; w++) {
+    // Use the first day of the week (Sunday) to determine month
+    const d = new Date(grid[w][0].date);
+    const month = d.getMonth();
+    if (month !== lastMonth) {
+      labels.push({ label: MONTHS[month], col: w });
+      lastMonth = month;
+    }
+  }
+
+  return labels;
 }
 
 function getStreak(sessions: Session[]): number {
   if (!sessions.length) return 0;
 
-  const dates = new Set(sessions.map(s => s.date));
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  let streak = 0;
-  let checkDate = new Date(today);
-
-  // Check if worked out today; if not, start from yesterday
-  const todayStr = checkDate.toISOString().slice(0, 10);
-  if (!dates.has(todayStr)) {
-    checkDate.setDate(checkDate.getDate() - 1);
-  }
-
-  // Count consecutive days with workouts (checking week-by-week: skip rest days within a week)
-  // For fitness, let's count consecutive weeks with at least one workout
   const weekSet = new Set<string>();
   for (const s of sessions) {
     const d = new Date(s.date);
@@ -63,15 +65,17 @@ function getStreak(sessions: Session[]): number {
     weekSet.add(weekStart.toISOString().slice(0, 10));
   }
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const currentWeekStart = new Date(today);
   currentWeekStart.setDate(today.getDate() - today.getDay());
 
   let weekCheck = new Date(currentWeekStart);
-  // If current week has no workout yet, start from last week
   if (!weekSet.has(weekCheck.toISOString().slice(0, 10))) {
     weekCheck.setDate(weekCheck.getDate() - 7);
   }
 
+  let streak = 0;
   while (weekSet.has(weekCheck.toISOString().slice(0, 10))) {
     streak++;
     weekCheck.setDate(weekCheck.getDate() - 7);
@@ -87,10 +91,11 @@ function cellColor(count: number, future: boolean): string {
   return 'bg-green-500/70';
 }
 
-const DAY_LABELS = ['', 'M', '', 'W', '', 'F', ''];
+const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 export default function FrequencyHeatmap({ sessions }: { sessions: Session[] }) {
-  const grid = getWeekGrid(sessions, 20);
+  const { grid } = getWeekGrid(sessions, 20);
+  const monthLabels = getMonthLabels(grid);
   const streak = getStreak(sessions);
 
   // Count sessions this week
@@ -105,26 +110,61 @@ export default function FrequencyHeatmap({ sessions }: { sessions: Session[] }) 
     return ws.toISOString().slice(0, 10) === thisWeekStr;
   }).length;
 
+  // Total workouts in the displayed range
+  const firstDate = grid[0][0].date;
+  const totalInRange = sessions.filter(s => s.date >= firstDate).length;
+
   return (
     <section className="rounded-xl border border-white/10 bg-zinc-900 p-5 mb-4">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-bold text-zinc-100">Workout Frequency</h2>
+      <div className="flex items-center justify-between mb-1">
+        <div>
+          <h2 className="text-sm font-bold text-zinc-100">Workout Frequency</h2>
+          <p className="text-[10px] text-zinc-500 mt-0.5">
+            {totalInRange} sessions in the last 20 weeks
+          </p>
+        </div>
         <div className="flex items-center gap-3">
           {streak > 0 && (
             <span className="text-[10px] text-green-400 font-semibold">
               {streak}w streak
             </span>
           )}
-          <span className="text-[10px] text-zinc-500">{thisWeekCount} this week</span>
+          <span className="rounded-full bg-zinc-800 border border-white/5 px-2 py-0.5 text-[10px] text-zinc-400 font-mono">
+            {thisWeekCount} this week
+          </span>
         </div>
+      </div>
+
+      {/* Month labels */}
+      <div className="flex mt-3 mb-1 pl-[20px]">
+        {(() => {
+          // Build a row of month labels positioned by column
+          const cells: React.ReactNode[] = [];
+          let lastCol = 0;
+          for (const { label, col } of monthLabels) {
+            if (col > lastCol) {
+              // spacer
+              cells.push(
+                <div key={`spacer-${col}`} style={{ width: `${(col - lastCol) * 15}px` }} />
+              );
+            }
+            cells.push(
+              <span key={label + col} className="text-[9px] text-zinc-500 font-medium">
+                {label}
+              </span>
+            );
+            lastCol = col + 1;
+          }
+          return cells;
+        })()}
       </div>
 
       <div className="flex gap-[3px] overflow-x-auto pb-1">
         {/* Day labels */}
-        <div className="flex flex-col gap-[3px] mr-1">
+        <div className="flex flex-col gap-[3px] mr-0.5 flex-shrink-0">
           {DAY_LABELS.map((label, i) => (
-            <div key={i} className="h-[12px] w-[12px] flex items-center justify-center">
-              <span className="text-[8px] text-zinc-600">{label}</span>
+            <div key={i} className="h-[12px] w-[14px] flex items-center justify-center">
+              <span className="text-[8px] text-zinc-600">{i % 2 === 1 ? label : ''}</span>
             </div>
           ))}
         </div>
@@ -135,8 +175,8 @@ export default function FrequencyHeatmap({ sessions }: { sessions: Session[] }) 
             {week.map((day, di) => (
               <div
                 key={di}
-                className={`h-[12px] w-[12px] rounded-[2px] ${cellColor(day.count, day.future)}`}
-                title={`${day.date}: ${day.count} workout${day.count !== 1 ? 's' : ''}`}
+                className={`h-[12px] w-[12px] rounded-[2px] ${cellColor(day.count, day.future)} transition-colors`}
+                title={`${day.date} (${DAY_LABELS[di]}): ${day.count} workout${day.count !== 1 ? 's' : ''}`}
               />
             ))}
           </div>
@@ -144,12 +184,27 @@ export default function FrequencyHeatmap({ sessions }: { sessions: Session[] }) 
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-2 mt-3">
-        <span className="text-[9px] text-zinc-600">Less</span>
-        <div className="h-[10px] w-[10px] rounded-[2px] bg-zinc-800/40" />
-        <div className="h-[10px] w-[10px] rounded-[2px] bg-green-500/40" />
-        <div className="h-[10px] w-[10px] rounded-[2px] bg-green-500/70" />
-        <span className="text-[9px] text-zinc-600">More</span>
+      <div className="flex items-center justify-between mt-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] text-zinc-600">Less</span>
+          <div className="flex items-center gap-1">
+            <div className="h-[10px] w-[10px] rounded-[2px] bg-zinc-800/40" title="No workout" />
+            <div className="h-[10px] w-[10px] rounded-[2px] bg-green-500/40" title="1 workout" />
+            <div className="h-[10px] w-[10px] rounded-[2px] bg-green-500/70" title="2+ workouts" />
+          </div>
+          <span className="text-[9px] text-zinc-600">More</span>
+        </div>
+        <div className="flex items-center gap-3 text-[9px] text-zinc-600">
+          <span className="flex items-center gap-1">
+            <span className="inline-block h-[8px] w-[8px] rounded-[2px] bg-zinc-800/40" /> Rest day
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="inline-block h-[8px] w-[8px] rounded-[2px] bg-green-500/40" /> 1 session
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="inline-block h-[8px] w-[8px] rounded-[2px] bg-green-500/70" /> 2+ sessions
+          </span>
+        </div>
       </div>
     </section>
   );
