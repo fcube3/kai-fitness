@@ -76,7 +76,7 @@ export default function SessionsPage() {
     <Shell>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-green-400">Private · Fitness</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-green-400">Private &middot; Fitness</p>
           <h1 className="mt-1 text-xl font-bold md:text-2xl">All Sessions</h1>
         </div>
         <a

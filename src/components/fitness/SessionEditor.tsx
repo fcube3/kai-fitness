@@ -103,7 +103,7 @@ export default function SessionEditor({
       date,
       split: split.trim() || null,
       week: week ? parseInt(week, 10) : null,
-      raw: '',
+      raw: session?.raw || '',
       exercises: validExercises.map(ex => ({
         name: ex.name.trim(),
         sets: ex.sets.filter(s => s.reps > 0 || s.weight > 0),
@@ -203,7 +203,7 @@ export default function SessionEditor({
                     className="text-zinc-600 hover:text-red-400 text-sm transition"
                     title="Remove exercise"
                   >
-                    ×
+                    &times;
                   </button>
                 )}
               </div>
@@ -241,7 +241,7 @@ export default function SessionEditor({
                         onClick={() => removeSet(exIdx, setIdx)}
                         className="text-zinc-600 hover:text-red-400 text-xs transition"
                       >
-                        ×
+                        &times;
                       </button>
                     )}
                   </div>
@@ -278,7 +278,7 @@ export default function SessionEditor({
             disabled={saving}
             className="rounded-lg bg-green-500/20 border border-green-500/30 px-4 py-2 text-sm text-green-400 hover:bg-green-500/30 transition disabled:opacity-50"
           >
-            {saving ? 'Saving…' : mode === 'create' ? 'Create Session' : 'Save Changes'}
+            {saving ? 'Saving\u2026' : mode === 'create' ? 'Create Session' : 'Save Changes'}
           </button>
         </div>
       </div>

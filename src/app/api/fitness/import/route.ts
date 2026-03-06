@@ -8,11 +8,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'FITNESS_PASSWORD not configured' }, { status: 503 });
   }
 
+  const cookieValue = request.cookies.get('fitness_auth')?.value?.trim();
   const authPassword =
     request.headers.get('x-fitness-password')?.trim() ||
     request.headers.get('authorization')?.replace('Bearer ', '').trim();
 
-  if (authPassword !== expectedPassword) {
+  if (cookieValue !== expectedPassword && authPassword !== expectedPassword) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
