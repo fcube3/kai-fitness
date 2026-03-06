@@ -153,10 +153,12 @@ function parseExerciseLine(line: string): Exercise | null {
  * Parse a full workout note.
  * @param noteText  Raw note text
  * @param referenceYear  Year to use for date derivation (from note metadata)
+ * @param creationMonth  Month (1-12) the note was created, for year boundary handling
  */
 export function parseWorkoutNote(
   noteText: string,
-  referenceYear: number = new Date().getFullYear()
+  referenceYear: number = new Date().getFullYear(),
+  creationMonth?: number
 ): WorkoutSession {
   const lines = noteText
     .split('\n')
@@ -185,9 +187,16 @@ export function parseWorkoutNote(
     if (ex) exercises.push(ex);
   }
 
+  // Handle year boundary: if creation was Jan/Feb but title says Nov/Dec, use previous year
+  let year = referenceYear;
+  if (creationMonth !== undefined) {
+    if (creationMonth <= 2 && parsed.month >= 11) year--;
+    if (creationMonth >= 11 && parsed.month <= 2) year++;
+  }
+
   return {
     id: parsed.id,
-    date: deriveDate(parsed.month, parsed.day, referenceYear),
+    date: deriveDate(parsed.month, parsed.day, year),
     split: parsed.split,
     week: parsed.week,
     raw: noteText,

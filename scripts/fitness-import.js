@@ -192,7 +192,21 @@ async function main() {
     if (!noteText) continue;
 
     const refDate = parseAppleDate(dateStr);
-    const session = parseWorkoutNote(noteText, refDate.getFullYear());
+    // Derive year from creation date, but handle year boundary:
+    // If note was created in Dec/Jan and title month differs significantly,
+    // the title month determines whether it's the previous or next year.
+    const titleLine = noteText.split('\n')[0]?.trim() || '';
+    const titleMatch = titleLine.match(/(\d{1,2})\/(\d{1,2})$/);
+    const titleMonth = titleMatch ? parseInt(titleMatch[1], 10) : null;
+    let refYear = refDate.getFullYear();
+    if (titleMonth !== null) {
+      const creationMonth = refDate.getMonth() + 1;
+      // If creation date is in Jan but title says Dec, use previous year
+      if (creationMonth <= 2 && titleMonth >= 11) refYear--;
+      // If creation date is in Dec but title says Jan, use next year
+      if (creationMonth >= 11 && titleMonth <= 2) refYear++;
+    }
+    const session = parseWorkoutNote(noteText, refYear);
     sessions.push(session);
 
     const status = session.parse_error ? '⚠' : '✓';
