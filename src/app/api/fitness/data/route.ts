@@ -29,14 +29,25 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: sessErr.message }, { status: 500 });
   }
 
-  // Fetch all exercises
-  const { data: allExercises, error: exErr } = await supabase
-    .from('fitness_exercises')
-    .select('*')
-    .order('id', { ascending: true });
+  // Fetch all exercises (paginate to avoid Supabase default 1000-row limit)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let allExercises: any[] = [];
+  let from = 0;
+  const PAGE_SIZE = 1000;
+  while (true) {
+    const { data: page, error: exErr } = await supabase
+      .from('fitness_exercises')
+      .select('*')
+      .order('id', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1);
 
-  if (exErr) {
-    return NextResponse.json({ error: exErr.message }, { status: 500 });
+    if (exErr) {
+      return NextResponse.json({ error: exErr.message }, { status: 500 });
+    }
+
+    allExercises = allExercises.concat(page || []);
+    if (!page || page.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
   }
 
   // Group exercises by session
