@@ -4,7 +4,7 @@ import { formatVol } from '@/lib/fitness-utils';
 
 const GREEN = '#22C55E';
 
-export function LineTooltip({ active, payload, label }: any) {
+export function LineTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-white/10 bg-zinc-900 px-3 py-2 text-xs shadow-xl">
@@ -14,7 +14,7 @@ export function LineTooltip({ active, payload, label }: any) {
   );
 }
 
-export function BarTooltip({ active, payload, label }: any) {
+export function BarTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-white/10 bg-zinc-900 px-3 py-2 text-xs shadow-xl">

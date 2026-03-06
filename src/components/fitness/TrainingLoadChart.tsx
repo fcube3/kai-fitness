@@ -81,7 +81,7 @@ export default function TrainingLoadChart({ sessions }: { sessions: Session[] })
                 borderRadius: '8px',
                 fontSize: '12px',
               }}
-              formatter={(value: number) => [value.toFixed(2), 'ACWR']}
+              formatter={(value) => [typeof value === 'number' ? value.toFixed(2) : String(value ?? ''), 'ACWR']}
               labelFormatter={(label) => `Week of ${label}`}
             />
 

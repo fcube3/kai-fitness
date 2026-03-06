@@ -40,7 +40,7 @@ export default function GoalEditor({
           setNotes(data.notes || '');
         }
       })
-      .catch(() => {})
+      .catch((e: Error) => console.error('Failed to load goal:', e.message))
       .finally(() => setLoading(false));
   }, [exerciseName]);
 

@@ -50,11 +50,11 @@ export default function SessionEditor({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  function updateExercise(idx: number, field: keyof EditorExercise, value: any) {
+  function updateExercise(idx: number, field: keyof EditorExercise, value: string | boolean | WorkoutSet[]) {
     setExercises(prev => prev.map((ex, i) => i === idx ? { ...ex, [field]: value } : ex));
   }
 
-  function updateSet(exIdx: number, setIdx: number, field: keyof WorkoutSet, value: any) {
+  function updateSet(exIdx: number, setIdx: number, field: keyof WorkoutSet, value: string | number) {
     setExercises(prev => prev.map((ex, i) => {
       if (i !== exIdx) return ex;
       return {
@@ -115,8 +115,8 @@ export default function SessionEditor({
 
     try {
       await onSave(sessionData);
-    } catch (e: any) {
-      setError(e.message || 'Failed to save');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to save');
       setSaving(false);
     }
   }

@@ -57,7 +57,7 @@ function computeVolumeWithAvg(sessions: Session[], lastN: WeekRange) {
   return data;
 }
 
-function VolumeTooltip({ active, payload, label }: any) {
+function VolumeTooltip({ active, payload, label }: { active?: boolean; payload?: { payload: { volume: number; sets: number; reps: number; avg: number } }[]; label?: string }) {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
   return (

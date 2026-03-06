@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { checkAuth } from '@/lib/api-auth';
+import type { Exercise } from '@/lib/types';
 
 /** POST /api/fitness/sessions — create a new manual session */
 export async function POST(request: NextRequest) {
@@ -67,16 +68,16 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function buildExerciseRows(sessionId: string, date: string, exercises: any[]) {
-  return exercises.map((ex: any) => {
+function buildExerciseRows(sessionId: string, date: string, exercises: Exercise[]) {
+  return exercises.map((ex) => {
     const allSets = ex.sets || [];
-    const workingSets = allSets.filter((s: any) => s.type === 'working');
-    const totalReps = allSets.reduce((sum: number, s: any) => sum + (s.reps || 0), 0);
-    const topWeight = allSets.length > 0 ? Math.max(...allSets.map((s: any) => s.weight || 0)) : 0;
-    const repsStr = allSets.map((s: any) => s.reps).join('/');
-    const weightDetailStr = allSets.map((s: any) => s.weight).join('/');
-    const uniqueWeights = new Set(allSets.map((s: any) => s.weight));
-    const volume = allSets.reduce((sum: number, s: any) => sum + (s.reps || 0) * (s.weight || 0), 0);
+    const workingSets = allSets.filter((s) => s.type === 'working');
+    const totalReps = allSets.reduce((sum, s) => sum + (s.reps || 0), 0);
+    const topWeight = allSets.length > 0 ? Math.max(...allSets.map((s) => s.weight || 0)) : 0;
+    const repsStr = allSets.map((s) => s.reps).join('/');
+    const weightDetailStr = allSets.map((s) => s.weight).join('/');
+    const uniqueWeights = new Set(allSets.map((s) => s.weight));
+    const volume = allSets.reduce((sum, s) => sum + (s.reps || 0) * (s.weight || 0), 0);
 
     return {
       session_id: sessionId,

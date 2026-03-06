@@ -24,7 +24,7 @@ export default function ExerciseNotes({ exerciseName }: { exerciseName: string }
     fetch(`/api/fitness/notes?exercise=${encodeURIComponent(exerciseName)}`, { credentials: 'include' })
       .then(r => r.json())
       .then(data => { if (Array.isArray(data)) setNotes(data); })
-      .catch(() => {})
+      .catch((e: Error) => console.error('Failed to load notes:', e.message))
       .finally(() => setLoading(false));
   }, [exerciseName]);
 

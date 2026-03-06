@@ -114,8 +114,8 @@ export default function NewSessionPage() {
       }
 
       router.push('/sessions');
-    } catch (e: any) {
-      setParseError(e.message || 'Failed to create session');
+    } catch (e: unknown) {
+      setParseError(e instanceof Error ? e.message : 'Failed to create session');
       setSaving(false);
     }
   }
