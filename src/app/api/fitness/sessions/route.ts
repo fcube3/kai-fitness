@@ -58,6 +58,9 @@ export async function POST(request: NextRequest) {
       const { error: exError } = await supabase.from('fitness_exercises').insert(rows);
       if (exError) {
         console.error('Exercise insert error:', exError);
+        // Roll back: delete the orphaned session
+        await supabase.from('fitness_sessions').delete().eq('id', session.id);
+        return NextResponse.json({ error: `Failed to save exercises: ${exError.message}` }, { status: 500 });
       }
     }
 

@@ -59,6 +59,7 @@ export async function PUT(
       const { error: exError } = await supabase.from('fitness_exercises').insert(rows);
       if (exError) {
         console.error('Exercise insert error:', exError);
+        return NextResponse.json({ error: `Failed to save exercises: ${exError.message}` }, { status: 500 });
       }
     }
 
